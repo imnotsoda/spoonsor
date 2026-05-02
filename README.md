@@ -46,7 +46,7 @@ pip install -r requirements.txt
 # Set up the database
 psql -d your_database -f schema.sql
 
-# Set environment variables
+# (optional) Set environment variables (in this case u will hv to edit database.py)
 export DB_HOST=localhost
 export DB_NAME=fundraising_db
 export DB_USER=your_username
@@ -81,3 +81,17 @@ This project was built with assistance from:
 - **Google Antigravity** — Code formatting, sample data generation, frontend HTML/CSS implementation (layout and Purdue color scheme designed by the developer)
 
 All AI-generated output was reviewed, tested, and modified to fit the project requirements.
+
+## Deployment Notes
+When deploying to a remote server, update the API base URL in both frontend files:
+- `static/admin.html`
+- `static/student.html`
+
+Change:
+```javascript
+const API = 'http://localhost:8000';
+```
+To your server's public IP:
+```javascript
+const API = 'http://YOUR_SERVER_IP:8000';
+```
