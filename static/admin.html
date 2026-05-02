@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Fundraising Deals</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --gold: #CFB991;
+      --gold-dk: #A88B5E;
+      --black: #111111;
+      --surface: #1A1A1A;
+      --card: #222222;
+      --border: #333333;
+      --text: #F0EDE8;
+      --muted: #888888;
+      --red: #E05C5C;
+      --green: #5CBF7F;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--black);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+
+    nav .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--gold);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+
+    nav .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      margin-left: 1.5rem;
+      transition: color 0.2s;
+    }
+
+    nav .nav-links a:hover,
+    nav .nav-links a.active {
+      color: var(--gold);
+    }
+
+    /* LAYOUT */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.8rem;
+      color: var(--gold);
+      margin-bottom: 0.3rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+
+    /* FORM CARD */
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--gold);
+      margin-bottom: 1.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    input,
+    select,
+    textarea {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 0.55rem 0.75rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--gold);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    select option {
+      background: var(--surface);
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding-top: 0.4rem;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--gold);
+    }
+
+    .checkbox-row label {
+      text-transform: none;
+      font-size: 0.9rem;
+      color: var(--text);
+      letter-spacing: 0;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.2rem;
+    }
+
+    .btn {
+      padding: 0.55rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: var(--black);
+    }
+
+    .btn-secondary {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .btn-danger {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .btn:hover {
+      opacity: 0.85;
+    }
+
+    /* TABLE */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    thead tr {
+      border-bottom: 2px solid var(--gold);
+    }
+
+    th {
+      text-align: left;
+      padding: 0.7rem 0.8rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.7rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: rgba(207, 185, 145, 0.04);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-active {
+      background: rgba(92, 191, 127, 0.15);
+      color: var(--green);
+    }
+
+    .badge-inactive {
+      background: rgba(224, 92, 92, 0.15);
+      color: var(--red);
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-sm {
+      padding: 0.3rem 0.7rem;
+      font-size: 0.78rem;
+      border-radius: 5px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--card);
+      border: 1px solid var(--gold);
+      color: var(--text);
+      padding: 0.75rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 2rem;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <a href="index.html" class="logo">🥄 Spoonsor</a>
+    <div class="nav-links">
+      <a href="admin.html" class="active">Admin</a>
+      <a href="student.html">Browse Deals</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1>Manage Deals</h1>
+    <p class="subtitle">Add, edit, or remove fundraising deals. Org and restaurant lists are loaded from the database.
+    </p>
+
+    <!-- FORM -->
+    <div class="form-card">
+      <h2 id="form-title">Add New Deal</h2>
+      <input type="hidden" id="edit-id" />
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Organization</label>
+          <select id="org-select">
+            <option value="">Loading...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Restaurant</label>
+          <select id="rest-select">
+            <option value="">Loading...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Promo Code</label>
+          <input type="text" id="promo-code" placeholder="e.g. CSCLUB10" />
+        </div>
+        <div class="form-group">
+          <label>Donation %</label>
+          <input type="number" id="donation-pct" min="0" max="100" step="0.01" placeholder="e.g. 15" />
+        </div>
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" id="start-date" />
+        </div>
+        <div class="form-group">
+          <label>End Date</label>
+          <input type="date" id="end-date" />
+        </div>
+        <div class="form-group full">
+          <label>Note (optional — e.g. "Valid on drinks only")</label>
+          <textarea id="note" placeholder="Any restrictions or special conditions..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Instructions (how to redeem)</label>
+          <textarea id="instruction" placeholder="e.g. Tell the cashier your org name before ordering..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Poster / Flyer URL (optional)</label>
+          <input type="url" id="poster-url" placeholder="https://drive.google.com/..." />
+        </div>
+        <div class="form-group full">
+          <div class="checkbox-row">
+            <input type="checkbox" id="is-active" checked />
+            <label for="is-active">Deal is currently active</label>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="submitDeal()">Save Deal</button>
+        <button class="btn btn-secondary" onclick="resetForm()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- ADD ORG -->
+    <div class="form-card">
+      <h2>Add New Organization</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Org Name</label>
+          <input type="text" id="org-name" placeholder="e.g. Purdue Debate Club" />
+        </div>
+        <div class="form-group">
+          <label>Contact Email</label>
+          <input type="email" id="org-email" placeholder="e.g. debate@purdue.edu" />
+        </div>
+        <div class="form-group full">
+          <label>Description</label>
+          <textarea id="org-desc" placeholder="Brief description of the org..."></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="submitOrg()">Add Organization</button>
+      </div>
+    </div>
+
+    <!-- ADD RESTAURANT -->
+    <div class="form-card">
+      <h2>Add New Restaurant</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Restaurant Name</label>
+          <input type="text" id="rest-name" placeholder="e.g. Triple XXX" />
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="rest-category">
+            <option value="Cafe">Cafe</option>
+            <option value="Fast Food">Fast Food</option>
+            <option value="Sit-down">Sit-down</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Address</label>
+          <input type="text" id="rest-location" placeholder="e.g. 2 N Salisbury St, West Lafayette, IN" />
+        </div>
+        <div class="form-group">
+          <label>Latitude</label>
+          <input type="number" id="rest-lat" step="0.000001" placeholder="e.g. 40.422562" />
+        </div>
+        <div class="form-group">
+          <label>Longitude</label>
+          <input type="number" id="rest-lng" step="0.000001" placeholder="e.g. -86.905781" />
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="submitRestaurant()">Add Restaurant</button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="form-card">
+      <h2>All Deals</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Promo Code</th>
+              <th>Organization</th>
+              <th>Restaurant</th>
+              <th>Donation %</th>
+              <th>Dates</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="deals-tbody">
+            <tr>
+              <td colspan="7" class="empty">Loading deals...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API = 'http://localhost:8000';
+
+    // ---- INIT ----
+    async function init() {
+      await Promise.all([loadOrgs(), loadRestaurants()]);
+      await loadDeals();
+    }
+
+    // ---- DROPDOWNS (dynamically built from DB) ----
+    async function loadOrgs() {
+      const res = await fetch(`${API}/organizations`);
+      const orgs = await res.json();
+      const sel = document.getElementById('org-select');
+      sel.innerHTML = '<option value="">Select org...</option>' +
+        orgs.map(o => `<option value="${o.org_id}">${o.name}</option>`).join('');
+    }
+
+    async function loadRestaurants() {
+      const res = await fetch(`${API}/restaurants`);
+      const rests = await res.json();
+      const sel = document.getElementById('rest-select');
+      sel.innerHTML = '<option value="">Select restaurant...</option>' +
+        rests.map(r => `<option value="${r.restaurant_id}">${r.name}</option>`).join('');
+    }
+
+    // ---- LOAD DEALS TABLE ----
+    async function loadDeals() {
+      const res = await fetch(`${API}/deals`);
+      const deals = await res.json();
+      const tbody = document.getElementById('deals-tbody');
+      if (!deals.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty">No deals yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = deals.map(d => `
+      <tr>
+        <td><strong>${d.promo_code}</strong></td>
+        <td>${d.org_name}</td>
+        <td>${d.restaurant_name}</td>
+        <td>${d.donation_percent}%</td>
+        <td style="color:var(--muted);font-size:0.82rem">${d.start_date} → ${d.end_date}</td>
+        <td>
+          <span class="badge ${d.is_active ? 'badge-active' : 'badge-inactive'}">
+            ${d.is_active ? 'Active' : 'Inactive'}
+          </span>
+        </td>
+        <td>
+          <div class="action-btns">
+            <button class="btn btn-secondary btn-sm" onclick='populateForm(${JSON.stringify(d)})'>Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteDeal(${d.deal_id})">Delete</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+    }
+
+    // ---- SUBMIT (create or update) ----
+    async function submitDeal() {
+      const id = document.getElementById('edit-id').value;
+      const payload = {
+        org_id: parseInt(document.getElementById('org-select').value),
+        restaurant_id: parseInt(document.getElementById('rest-select').value),
+        promo_code: document.getElementById('promo-code').value.trim(),
+        donation_percent: parseFloat(document.getElementById('donation-pct').value),
+        start_date: document.getElementById('start-date').value,
+        end_date: document.getElementById('end-date').value,
+        is_active: document.getElementById('is-active').checked,
+        note: document.getElementById('note').value || null,
+        instruction: document.getElementById('instruction').value || null,
+        poster_url: document.getElementById('poster-url').value || null,
+      };
+
+      const url = id ? `${API}/deals/${id}` : `${API}/deals`;
+      const method = id ? 'PUT' : 'POST';
+
+      await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      showToast(id ? 'Deal updated!' : 'Deal created!');
+      resetForm();
+      loadDeals();
+    }
+
+    // ---- DELETE ----
+    async function deleteDeal(id) {
+      if (!confirm('Delete this deal?')) return;
+      await fetch(`${API}/deals/${id}`, { method: 'DELETE' });
+      showToast('Deal deleted.');
+      loadDeals();
+    }
+
+    // ---- POPULATE FORM FOR EDIT ----
+    function populateForm(d) {
+      document.getElementById('edit-id').value = d.deal_id;
+      document.getElementById('org-select').value = d.org_id;
+      document.getElementById('rest-select').value = d.restaurant_id;
+      document.getElementById('promo-code').value = d.promo_code;
+      document.getElementById('donation-pct').value = d.donation_percent;
+      document.getElementById('start-date').value = d.start_date;
+      document.getElementById('end-date').value = d.end_date;
+      document.getElementById('is-active').checked = d.is_active;
+      document.getElementById('note').value = d.note || '';
+      document.getElementById('instruction').value = d.instruction || '';
+      document.getElementById('poster-url').value = d.poster_url || '';
+      document.getElementById('form-title').textContent = 'Edit Deal';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ---- RESET FORM ----
+    function resetForm() {
+      ['edit-id', 'promo-code', 'donation-pct', 'start-date', 'end-date', 'note', 'instruction', 'poster-url']
+        .forEach(id => document.getElementById(id).value = '');
+      document.getElementById('org-select').selectedIndex = 0;
+      document.getElementById('rest-select').selectedIndex = 0;
+      document.getElementById('is-active').checked = true;
+      document.getElementById('form-title').textContent = 'Add New Deal';
+    }
+
+    // ---- ADD ORG ----
+    async function submitOrg() {
+      const name = document.getElementById('org-name').value.trim();
+      const email = document.getElementById('org-email').value.trim();
+      const desc = document.getElementById('org-desc').value.trim();
+      if (!name) { showToast('Org name is required.'); return; }
+
+      const params = new URLSearchParams({ name });
+      if (email) params.append('contact_email', email);
+      if (desc) params.append('description', desc);
+
+      await fetch(`${API}/organizations?${params}`, { method: 'POST' });
+      showToast('Organization added!');
+      document.getElementById('org-name').value = '';
+      document.getElementById('org-email').value = '';
+      document.getElementById('org-desc').value = '';
+      await loadOrgs(); // refresh dropdown
+    }
+
+    // ---- ADD RESTAURANT ----
+    async function submitRestaurant() {
+      const name = document.getElementById('rest-name').value.trim();
+      const location = document.getElementById('rest-location').value.trim();
+      const category = document.getElementById('rest-category').value;
+      const lat = document.getElementById('rest-lat').value;
+      const lng = document.getElementById('rest-lng').value;
+      if (!name) { showToast('Restaurant name is required.'); return; }
+
+      const params = new URLSearchParams({ name });
+      if (location) params.append('location', location);
+      if (category) params.append('category', category);
+      if (lat) params.append('lat', lat);
+      if (lng) params.append('lng', lng);
+
+      await fetch(`${API}/restaurants?${params}`, { method: 'POST' });
+      showToast('Restaurant added!');
+      document.getElementById('rest-name').value = '';
+      document.getElementById('rest-location').value = '';
+      document.getElementById('rest-lat').value = '';
+      document.getElementById('rest-lng').value = '';
+      await loadRestaurants(); // refresh dropdown
+    }
+
+    // ---- TOAST ----
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    init();
+  </script>
+</body>
+
+</html>

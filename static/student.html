@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥄</text></svg>" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse Deals — Spoonsor</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <style>
+    :root {
+      --gold: #CFB991;
+      --gold-dk: #A88B5E;
+      --black: #111111;
+      --surface: #1A1A1A;
+      --card: #222222;
+      --border: #333333;
+      --text: #F0EDE8;
+      --muted: #888888;
+      --red: #E05C5C;
+      --green: #5CBF7F;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--black);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+
+    nav .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    nav .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      margin-left: 1.5rem;
+      transition: color 0.2s;
+    }
+
+    nav .nav-links a:hover,
+    nav .nav-links a.active {
+      color: var(--gold);
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #1A1500 0%, #111111 60%);
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 2.2rem;
+      color: var(--gold);
+      margin-bottom: 0.4rem;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* STATS */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* FILTERS */
+    .filters {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      flex: 1;
+      min-width: 160px;
+    }
+
+    label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 0.5rem 0.75rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus {
+      border-color: var(--gold);
+    }
+
+    select option {
+      background: var(--surface);
+    }
+
+    .btn {
+      padding: 0.55rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover {
+      opacity: 0.85;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: var(--black);
+    }
+
+    .btn-secondary {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--gold);
+      border: 1px solid var(--gold);
+    }
+
+    /* MAP */
+    .map-section {
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    #map {
+      height: 380px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    /* NOTIFICATION BANNER */
+    .notif-bar {
+      background: var(--card);
+      border: 1px solid var(--gold-dk);
+      border-radius: 10px;
+      padding: 0.9rem 1.2rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .notif-bar p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      flex: 1;
+    }
+
+    .notif-bar p span {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    #notif-status {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    /* PROXIMITY TOAST */
+    .prox-toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      max-width: 320px;
+      background: var(--card);
+      border: 1px solid var(--gold);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.3s;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .prox-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .prox-toast .pt-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      color: var(--gold);
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .prox-toast .pt-body {
+      font-size: 0.82rem;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    /* DEALS GRID */
+    .deals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .deal-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      transition: border-color 0.2s, transform 0.2s;
+      animation: fadeIn 0.3s ease both;
+    }
+
+    .deal-card:hover {
+      border-color: var(--gold-dk);
+      transform: translateY(-2px);
+    }
+
+    .deal-card.nearby {
+      border-color: var(--gold);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .deal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .deal-org {
+      font-size: 0.78rem;
+      color: var(--gold);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .badge-active {
+      background: rgba(92, 191, 127, 0.15);
+      color: var(--green);
+    }
+
+    .badge-inactive {
+      background: rgba(224, 92, 92, 0.15);
+      color: var(--red);
+    }
+
+    .badge-cafe {
+      background: rgba(207, 185, 145, 0.15);
+      color: var(--gold);
+    }
+
+    .badge-fastfood {
+      background: rgba(100, 160, 255, 0.15);
+      color: #6AB0FF;
+    }
+
+    .badge-sitdown {
+      background: rgba(180, 130, 255, 0.15);
+      color: #C080FF;
+    }
+
+    .badge-nearby {
+      background: rgba(207, 185, 145, 0.2);
+      color: var(--gold);
+    }
+
+    .deal-restaurant {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .deal-location {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.1rem;
+    }
+
+    .promo-row {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .promo-code {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+    }
+
+    .donation-pct {
+      font-size: 0.85rem;
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    .deal-note,
+    .deal-instruction {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .deal-note strong,
+    .deal-instruction strong {
+      color: var(--text);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .deal-dates {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: auto;
+    }
+
+    .poster-link {
+      display: inline-block;
+      font-size: 0.8rem;
+      color: var(--gold);
+      text-decoration: none;
+      margin-top: 0.2rem;
+    }
+
+    .poster-link:hover {
+      text-decoration: underline;
+    }
+
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--muted);
+      padding: 3rem;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 600px) {
+      .stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <a href="index.html" class="logo">🥄 Spoonsor</a>
+    <div class="nav-links">
+      <a href="admin.html">Admin</a>
+      <a href="student.html" class="active">Browse Deals</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <h1>Support Your Campus Orgs</h1>
+    <p>Use a promo code when you eat out — a portion goes to a student organization.</p>
+  </div>
+
+  <div class="container">
+
+    <!-- STATS -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-label">Total Deals</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-avg">—</div>
+        <div class="stat-label">Avg. Donation %</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-orgs">—</div>
+        <div class="stat-label">Orgs Involved</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-rests">—</div>
+        <div class="stat-label">Restaurants</div>
+      </div>
+    </div>
+
+    <!-- LOCATION NOTIFICATION BAR -->
+    <div class="notif-bar">
+      <div>
+        <p>📍 <span>Nearby deal alerts</span> — get notified when you're within 300m of a participating restaurant.</p>
+        <div id="notif-status">Status: not enabled</div>
+      </div>
+      <button class="btn btn-outline" onclick="enableNotifications()">Enable Alerts</button>
+    </div>
+
+    <!-- MAP -->
+    <div class="map-section">
+      <div class="section-title">
+        <span>📍 Restaurant Locations</span>
+      </div>
+      <div id="map"></div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters">
+      <div class="filter-group">
+        <label>Organization</label>
+        <select id="filter-org">
+          <option value="">All Orgs</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Restaurant</label>
+        <select id="filter-rest">
+          <option value="">All Restaurants</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Category</label>
+        <select id="filter-cat">
+          <option value="">All Categories</option>
+          <option value="Cafe">Cafe</option>
+          <option value="Fast Food">Fast Food</option>
+          <option value="Sit-down">Sit-down</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Status</label>
+        <select id="filter-active">
+          <option value="">All</option>
+          <option value="true" selected>Active Only</option>
+          <option value="false">Inactive Only</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:0.5rem">
+        <button class="btn btn-primary" onclick="applyFilters()">Apply</button>
+        <button class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+      </div>
+    </div>
+
+    <!-- DEALS -->
+    <div class="deals-grid" id="deals-grid">
+      <div class="empty">Loading deals...</div>
+    </div>
+
+  </div>
+
+  <div class="prox-toast" id="prox-toast">
+    <div class="pt-title" id="pt-title"></div>
+    <div class="pt-body" id="pt-body"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script>
+    const API = 'http://localhost:8000';
+    const NEARBY_RADIUS_METERS = 300;
+
+    let allDeals = [];
+    let restaurants = [];
+    let map, markers = [];
+    let watchId = null;
+    let notifiedRestaurants = new Set(); // avoid repeat notifications
+
+    // =============================================
+    // INIT
+    // =============================================
+    async function init() {
+      await Promise.all([loadOrgDropdown(), loadRestDropdown()]);
+      initMap();
+      await loadDeals({ is_active: true });
+      await loadStats({ is_active: true });
+      plotAllRestaurantsOnMap(); // always show all restaurants regardless of filters
+    }
+
+    // =============================================
+    // MAP
+    // =============================================
+    function initMap() {
+      // Center on Purdue campus
+      map = L.map('map').setView([40.4259, -86.9081], 14);
+
+      // Dark tile layer
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap contributors © CARTO',
+        maxZoom: 19
+      }).addTo(map);
+    }
+
+    function plotAllRestaurantsOnMap() {
+      // Clear old markers
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+
+      // Plot every restaurant from the full list
+      restaurants.forEach(r => {
+        if (!r.lat || !r.lng) return;
+
+        // Check if this restaurant has any active deals
+        const activeDeals = allDeals.filter(d => d.restaurant_id === r.restaurant_id && d.is_active);
+        const hasDeals = activeDeals.length > 0;
+        const color = hasDeals ? '#CFB991' : '#555555';
+
+        const icon = L.divIcon({
+          className: '',
+          html: `<div style="
+          background:${color}; color:#111; width:32px; height:32px; border-radius:50% 50% 50% 0;
+          transform:rotate(-45deg); display:flex; align-items:center; justify-content:center;
+          border:2px solid #111; box-shadow:0 2px 8px rgba(0,0,0,0.5); font-size:13px;
+        "><span style="transform:rotate(45deg)">🍽️</span></div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -36]
+        });
+
+        const codes = activeDeals.map(x => `<b>${x.promo_code}</b> — ${x.org_name} (${x.donation_percent}%)`).join('<br/>');
+        const popupContent = `
+        <div style="font-family:'DM Sans',sans-serif;min-width:200px">
+          <div style="font-weight:700;font-size:1rem;margin-bottom:2px">${r.name}</div>
+          <div style="color:#888;font-size:0.78rem;margin-bottom:8px">📍 ${r.location}</div>
+          <div style="font-size:0.75rem;color:#aaa;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">${r.category}</div>
+          ${hasDeals
+            ? `<div style="font-size:0.82rem;line-height:1.6">${codes}</div>`
+            : `<div style="color:#666;font-size:0.82rem">No active deals right now</div>`
+          }
+        </div>`;
+
+        const marker = L.marker([r.lat, r.lng], { icon })
+          .addTo(map)
+          .bindPopup(popupContent);
+        markers.push(marker);
+      });
+    }
+
+    // =============================================
+    // GEOLOCATION + NOTIFICATIONS
+    // =============================================
+    async function enableNotifications() {
+      const statusEl = document.getElementById('notif-status');
+
+      // Request notification permission
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') {
+        statusEl.textContent = 'Status: notification permission denied.';
+        return;
+      }
+
+      // Request geolocation
+      if (!navigator.geolocation) {
+        statusEl.textContent = 'Status: geolocation not supported in this browser.';
+        return;
+      }
+
+      statusEl.textContent = 'Status: watching your location...';
+
+      watchId = navigator.geolocation.watchPosition(
+        (pos) => checkProximity(pos.coords.latitude, pos.coords.longitude),
+        (err) => { statusEl.textContent = `Status: location error — ${err.message}`; },
+        { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 }
+      );
+    }
+
+    function checkProximity(userLat, userLng) {
+      const statusEl = document.getElementById('notif-status');
+      statusEl.textContent = `Status: location active (${userLat.toFixed(4)}, ${userLng.toFixed(4)})`;
+
+      // Add blue dot for user location
+      if (window._userMarker) map.removeLayer(window._userMarker);
+      window._userMarker = L.circleMarker([userLat, userLng], {
+        radius: 8, fillColor: '#4A90D9', color: '#fff', weight: 2, fillOpacity: 0.9
+      }).addTo(map).bindPopup('You are here');
+
+      // Check each restaurant with active deals
+      const activeRestaurants = [...new Set(
+        allDeals.filter(d => d.is_active && d.lat && d.lng).map(d => d.restaurant_id)
+      )];
+
+      allDeals.forEach(d => {
+        if (!d.is_active || !d.lat || !d.lng) return;
+        if (notifiedRestaurants.has(d.restaurant_id)) return;
+
+        const dist = getDistanceMeters(userLat, userLng, d.lat, d.lng);
+        if (dist <= NEARBY_RADIUS_METERS) {
+          notifiedRestaurants.add(d.restaurant_id);
+
+          const activeDeals = allDeals.filter(x => x.restaurant_id === d.restaurant_id && x.is_active);
+          const codeList = activeDeals.map(x => x.promo_code).join(', ');
+
+          // Browser notification
+          new Notification(`🍽️ Deal nearby: ${d.restaurant_name}!`, {
+            body: `Use code ${codeList} to support a campus org. You're ${Math.round(dist)}m away.`,
+            icon: '/static/icon.png'
+          });
+
+          // In-page toast
+          showProxToast(d.restaurant_name, codeList, Math.round(dist));
+
+          // Highlight card
+          document.querySelectorAll('.deal-card').forEach(card => {
+            if (card.dataset.restaurantId == d.restaurant_id) {
+              card.classList.add('nearby');
+            }
+          });
+        }
+      });
+    }
+
+    // Haversine formula — distance in meters between two lat/lng points
+    function getDistanceMeters(lat1, lng1, lat2, lng2) {
+      const R = 6371000;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function showProxToast(name, codes, dist) {
+      document.getElementById('pt-title').textContent = `📍 You're near ${name}!`;
+      document.getElementById('pt-body').textContent = `Use code ${codes} to support a campus org. ~${dist}m away.`;
+      const t = document.getElementById('prox-toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 6000);
+    }
+
+    // =============================================
+    // DROPDOWNS
+    // =============================================
+    async function loadOrgDropdown() {
+      const orgs = await fetch(`${API}/organizations`).then(r => r.json());
+      const sel = document.getElementById('filter-org');
+      orgs.forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o.org_id; opt.textContent = o.name; sel.appendChild(opt);
+      });
+    }
+
+    async function loadRestDropdown() {
+      restaurants = await fetch(`${API}/restaurants`).then(r => r.json());
+      const sel = document.getElementById('filter-rest');
+      restaurants.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.restaurant_id; opt.textContent = r.name; sel.appendChild(opt);
+      });
+    }
+
+    // =============================================
+    // DEALS
+    // =============================================
+    async function loadDeals(params = {}) {
+      const qs = new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([, v]) => v !== '')));
+      const deals = await fetch(`${API}/deals?${qs}`).then(r => r.json());
+      allDeals = deals;
+      renderDeals(deals);
+      plotAllRestaurantsOnMap(); // re-plot so popup deal info stays current with filters
+    }
+
+    function renderDeals(deals) {
+      const grid = document.getElementById('deals-grid');
+      if (!deals.length) { grid.innerHTML = '<div class="empty">No deals match your filters.</div>'; return; }
+      grid.innerHTML = deals.map(d => {
+        const catBadge = d.category === 'Cafe' ? 'badge-cafe' : d.category === 'Fast Food' ? 'badge-fastfood' : 'badge-sitdown';
+        return `
+        <div class="deal-card" data-restaurant-id="${d.restaurant_id}">
+          <div class="deal-header">
+            <div class="deal-org">${d.org_name}</div>
+            <div style="display:flex;gap:0.4rem;flex-wrap:wrap;justify-content:flex-end">
+              <span class="badge ${catBadge}">${d.category}</span>
+              <span class="badge ${d.is_active ? 'badge-active' : 'badge-inactive'}">${d.is_active ? 'Active' : 'Expired'}</span>
+            </div>
+          </div>
+          <div>
+            <div class="deal-restaurant">${d.restaurant_name}</div>
+            <div class="deal-location">📍 ${d.location}</div>
+          </div>
+          <div class="promo-row">
+            <span class="promo-code">${d.promo_code}</span>
+            <span class="donation-pct">↑ ${d.donation_percent}% donated</span>
+          </div>
+          ${d.note ? `<div class="deal-note"><strong>Note</strong><br/>${d.note}</div>` : ''}
+          ${d.instruction ? `<div class="deal-instruction"><strong>How to redeem</strong><br/>${d.instruction}</div>` : ''}
+          <div class="deal-dates">📅 ${d.start_date} — ${d.end_date}
+            ${d.poster_url ? `<br/><a class="poster-link" href="${d.poster_url}" target="_blank">View flyer →</a>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // =============================================
+    // STATS
+    // =============================================
+    async function loadStats(params = {}) {
+      const qs = new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([, v]) => v !== '')));
+      const s = await fetch(`${API}/report/stats?${qs}`).then(r => r.json());
+      document.getElementById('stat-total').textContent = s.total_deals ?? '—';
+      document.getElementById('stat-avg').textContent = s.avg_donation_percent ? `${s.avg_donation_percent}%` : '—';
+      document.getElementById('stat-orgs').textContent = s.orgs_involved ?? '—';
+      document.getElementById('stat-rests').textContent = s.restaurants_involved ?? '—';
+    }
+
+    // =============================================
+    // FILTERS
+    // =============================================
+    function getFilterParams() {
+      const params = {};
+      const org = document.getElementById('filter-org').value;
+      const rest = document.getElementById('filter-rest').value;
+      const cat = document.getElementById('filter-cat').value;
+      const active = document.getElementById('filter-active').value;
+      if (org) params.org_id = org;
+      if (rest) params.restaurant_id = rest;
+      if (cat) params.category = cat;
+      if (active) params.is_active = active;
+      return params;
+    }
+
+    function applyFilters() {
+      const p = getFilterParams();
+      loadDeals(p);
+      loadStats(p);
+      notifiedRestaurants.clear(); // reset so nearby checks re-run on new results
+    }
+
+    function clearFilters() {
+      document.getElementById('filter-org').selectedIndex = 0;
+      document.getElementById('filter-rest').selectedIndex = 0;
+      document.getElementById('filter-cat').selectedIndex = 0;
+      document.getElementById('filter-active').selectedIndex = 1;
+      applyFilters();
+    }
+
+    init();
+  </script>
+</body>
+
+</html>
