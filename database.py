@@ -2,8 +2,8 @@ import psycopg2
 import psycopg2.extras
 import os
 
-#TODO: use env variables to avoid hardcoding (security)
 #PostgreSQL credentials
+#NOTE: On the EC2 server, these are replaced with env variables to avoid hardcoding
 DB_CONFIG = {
     "host":     "localhost",
     "database": "fundraising_db",
